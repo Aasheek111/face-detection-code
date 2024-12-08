@@ -3,162 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <title>Door Control Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-        }
-
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 2em;
-            color: #333;
-        }
-
-        h2 {
-            text-align: center;
-            font-size: 1.5em;
-            color: #444;
-        }
-
-        #video-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        #video-feed {
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 700px;
-        }
-
-        #chat-container {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        #chat-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            width: 80%;
-            max-width: 500px;
-            height: 300px;
-            overflow-y: scroll;
-            background-color: #fff;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #333;
-        }
-
-        #message-container {
-            display: flex;
-            justify-content: center;
-            width: 80%;
-            max-width: 500px;
-        }
-
-        #message {
-            width: 85%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        @media (max-width: 768px) {
-            #video-feed {
-                width: 100%;
-                max-width: 100%;
-            }
-
-            #chat-box {
-                width: 100%;
-                max-width: 100%;
-            }
-
-            #message-container {
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            #message {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
+        /* Your CSS styling here */
     </style>
 </head>
 <body>
+    <h1>Welcome, User</h1>
 
-    <h1>Welcome, {{ username }}</h1>
     <h2>Live Video Feed</h2>
-
-    <!-- Video Feed -->
-    <div id="video-container">
-        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Live Video Feed">
+    <div>
+        <img src="{{ url_for('video_feed') }}" width="640" height="480" />
     </div>
-    
-    <h2>Chat</h2>
 
-    <!-- Chat Box -->
-    <div id="chat-container">
-        <div id="chat-box"></div>
+    <h2>Door Control</h2>
+    <button onclick="openDoor()">Open Door</button>
+    <button onclick="closeDoor()">Close Door</button>
+    <p id="door-status">Door Status: Unknown</p>
 
-        <!-- Message Input and Send Button -->
-        <div id="message-container">
-            <input type="text" id="message" placeholder="Type a message">
-            <button onclick="sendMessage()">Send</button>
-        </div>
-    </div>
+    <h2>Live Chat</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="chat-message" placeholder="Type a message">
+    <button onclick="sendMessage()">Send Message</button>
 
     <script>
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        function openDoor() {
+            fetch('http://192.168.100.53/open').then(response => response.json()).then(data => {
+                document.getElementById('door-status').innerText = `Door Status: ${data.status}`;
+            });
+        }
 
-        // Listen for incoming messages
-        socket.on('message', function(data) {
-            var chatBox = document.getElementById("chat-box");
-            var messageElement = document.createElement("div");
-            messageElement.innerText = data;
-            chatBox.appendChild(messageElement);
-            
-            // Scroll to the bottom of the chat box
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
+        function closeDoor() {
+            fetch('http://192.168.100.53/close').then(response => response.json()).then(data => {
+                document.getElementById('door-status').innerText = `Door Status: ${data.status}`;
+            });
+        }
 
-        // Send message function
         function sendMessage() {
-            var message = document.getElementById("message").value;
-            socket.emit('user-message', message);
-            document.getElementById("message").value = ''; // Clear the input field
+            let message = document.getElementById('chat-message').value;
+            // Emit message to the server
         }
     </script>
-
 </body>
 </html>

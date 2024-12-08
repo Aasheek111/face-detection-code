@@ -46,7 +46,7 @@ if not os.path.exists("captures"):
 users = {
     'gautamabhiyan51@gmail.com': 'gammaboy',
     'vvs16@gmail.com': 'vvss',
-    'gautamaashik111@gmail.com':'tecbro'
+    'gautamaashik111@gmail.com':'techbro'
 }
 
 # Known face encodings and names
@@ -263,6 +263,26 @@ def video_feed():
                        b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n')
 
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+NODEMCU_IP = '192.168.100.53'
+@app.route('/open_door')
+def open_door():
+    # Send HTTP request to open the door
+    response = requests.get("http://192.168.100.53/open")
+    return jsonify(status="Door Opened" if response.status_code == 200 else "Failed")
+
+@app.route('/close_door')
+def close_door():
+    # Send HTTP request to close the door
+    response = requests.get("http://192.168.100.53/close")
+    return jsonify(status="Door Closed" if response.status_code == 200 else "Failed")
+
+@app.route('/status')
+def door_status():
+    # Send HTTP request to get the door status (this would be dynamically handled by your NodeMCU)
+    response = requests.get(f"{NODEMCU_IP}/status")
+    status = response.json() if response.status_code == 200 else {"status": "Error fetching status"}
+    return jsonify(status=status)
 
 @app.route('/logout')
 def logout():
