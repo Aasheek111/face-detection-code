@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        /* Styling for chat box */
+        #chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 300px;
+            height: 400px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+        }
+        .chat-message {
+            padding: 5px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e0f7fa;
+            color: #00796b;
+        }
+        .system-message {
+            background-color: #f1f8e9;
+            color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ username }}</h1>
+
+    <h2>Chat</h2>
+    <!-- Chat Box Section -->
+    <div id="chat-box">
+        <!-- Past chat messages will appear here -->
+        {% for message in chat_history %}
+            <div class="chat-message system-message">{{ message }}</div>
+        {% endfor %}
+    </div>
+    <input type="text" id="message" placeholder="Type a message" style="width: 80%;">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Listen for incoming messages
+        socket.on('message', function(data) {
+            var chatBox = document.getElementById("chat-box");
+            var messageElement = document.createElement("div");
+            
+            // Add a different color based on message type (user or system)
+            if (data.type === 'user') {
+                messageElement.className = "chat-message user-message";
+            } else {
+                messageElement.className = "chat-message system-message";
+            }
+            
+            messageElement.innerText = data.username + ": " + data.message;
+            chatBox.appendChild(messageElement);
+
+            // Scroll to the bottom of the chat box
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Send message function
+        function sendMessage() {
+            var message = document.getElementById("message").value;
+            if (message.trim()) {
+                // Send the message with the username and type 'user'
+                socket.emit('user-message', { message: message, username: "{{ username }}" });
+                document.getElementById("message").value = ''; // Clear the input field
+            }
+        }
+    </script>
+</body>
+</html>
